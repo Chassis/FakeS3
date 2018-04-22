@@ -4,6 +4,7 @@ A Chassis extension to install and configure Fake S3 on your Chassis server.
 ## Usage
 1. Add this extension to your extensions directory `git clone git@github.com:Chassis/FakeS3.git extensions/fakes3`
 2. Run `vagrant provision`.
+3. Copy the `fakes3-mu-plugin.php` file to your `mu-plugins` directory to support S3 Uploads.
 
 ## Configuration options
 You can configure the path on the server and the port used in your chassis config file.

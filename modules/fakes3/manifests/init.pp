@@ -12,19 +12,61 @@ class fakes3 (
   # Allow override from config.yaml
   $options = deep_merge($defaults, $config[fakes3])
 
-  package { 'fakes3':
-    ensure   => 'installed',
-    provider => 'gem',
-  }
+  $port = $options[port]
+  $path = $options[path]
 
-  exec { 'start fakes3':
-    command => "fakes3 -r ${options[path]} -p ${options[port]}",
-    require => Package['fakes3'],
-  }
+  if ( !empty($config[disabled_extensions]) and 'chassis/fakes3' in $config[disabled_extensions] ) {
 
-  file_line { 'FAKE_S3_PORT':
-    path => '/etc/environment',
-    line => "FAKE_S3_PORT=${options[port]}"
-  }
+    # Kill the service if running
+    service { 'fakes3':
+      binary   => "/usr/local/bin/fakes3 -r ${path} -p ${port}",
+      ensure   => 'stopped',
+      provider => 'base',
+      before   => Package['fakes3']
+    }
 
+    # Remove the package
+    package { 'fakes3':
+      ensure   => 'absent',
+      provider => 'gem',
+    }
+
+    # Remove the local-config.php file
+    file { '/vagrant/extensions/fakes3/local-config.php':
+      ensure => 'absent',
+    }
+
+  } else {
+
+    # Install fakes3 gem
+    package { 'fakes3':
+      ensure   => 'installed',
+      provider => 'gem',
+    }
+
+    # Create the mount point
+    file { $path:
+      ensure => 'directory',
+    }
+
+    # Start the service
+    service { 'fakes3':
+      binary   => "/usr/local/bin/fakes3 -r ${path} -p ${port}",
+      ensure   => 'running',
+      enable   => true,
+      provider => 'base',
+      require  => [ Package['fakes3'], File[$path] ],
+    }
+
+    # Create default bucket
+    exec { 'fakes3 bucket':
+      command => "/usr/bin/curl -H \"Host: chassis.s3.amazonaws.com\" -H \"x-amz-acl: public-read\" -XPUT http://localhost:${port}"
+    }
+
+    # Make port number available to PHP
+    file { '/vagrant/extensions/fakes3/local-config.php':
+      ensure  => 'present',
+      content => template('fakes3/local-config.php.erb'),
+    }
+  }
 }
