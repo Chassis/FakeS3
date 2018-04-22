@@ -1,4 +1,4 @@
-# Faek S3
+# Fake S3
 A Chassis extension to install and configure Fake S3 on your Chassis server.
 
 ## Usage
