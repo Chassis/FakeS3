@@ -19,8 +19,8 @@ class fakes3 (
 
     # Kill the service if running
     service { 'fakes3':
-      binary   => "/usr/local/bin/fakes3 -r ${path} -p ${port}",
       ensure   => 'stopped',
+      binary   => "/usr/local/bin/fakes3 -r ${path} -p ${port}",
       provider => 'base',
       before   => Package['fakes3']
     }
@@ -51,8 +51,8 @@ class fakes3 (
 
     # Start the service
     service { 'fakes3':
-      binary   => "/usr/local/bin/fakes3 -r ${path} -p ${port}",
       ensure   => 'running',
+      binary   => "/usr/local/bin/fakes3 -r ${path} -p ${port}",
       enable   => true,
       provider => 'base',
       require  => [ Package['fakes3'], File[$path] ],
