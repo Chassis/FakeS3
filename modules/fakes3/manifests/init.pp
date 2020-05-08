@@ -42,6 +42,7 @@ class fakes3 (
     package { 'fakes3':
       ensure   => 'installed',
       provider => 'gem',
+      source   => 'https://rubygems.org'
     }
 
     # Create the mount point
